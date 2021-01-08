@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
 
 namespace PerfTest
 {
     public class Program
     {
-        static async Task Main()
+        public static void Main()
         {
             Console.WriteLine("Start");
 
-            var summary = BenchmarkRunner.Run<ConsumerBenchmark>();
+            BenchmarkRunner.Run<ConsumerBenchmark>();
 
             Console.WriteLine("Done");
             Console.ReadKey();
