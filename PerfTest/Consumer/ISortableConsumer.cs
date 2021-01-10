@@ -5,11 +5,17 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public interface IConsumer<in T>
+    public interface ISortableConsumer<in T>
     {
         /// <summary>
         /// 
         /// </summary>
         Task ConsumeAsync(T val);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        int[] GetOrdered();
     }
 }
