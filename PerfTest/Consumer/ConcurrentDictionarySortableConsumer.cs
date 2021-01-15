@@ -8,7 +8,7 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public class ConcurrentDictionarySortableConsumer : ISortableConsumer<int>
+    public class ConcurrentDictionarySortableConsumer : SortableConsumerBase
     {
         private readonly ConcurrentDictionary<int, int> _memory;
 
@@ -21,7 +21,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
-        public Task ConsumeAsync(int val)
+        public override Task ConsumeAsync(int val)
         {
             _memory.AddOrUpdate(val, i => 1, (key, oldValue) => oldValue + 1);
 
@@ -29,7 +29,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public int[] GetOrdered()
+        public override int[] GetOrdered()
         {
             var list = new List<int>();
             foreach (var keyValuePair in _memory.OrderBy(x => x.Key))

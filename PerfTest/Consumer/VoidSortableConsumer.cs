@@ -3,18 +3,18 @@
 namespace PerfTest.Consumer
 {
     /// <summary>
-    /// 
+    /// Simpliest consumer, to test Channel impact on benchmark
     /// </summary>
-    public class VoidSortableConsumer : ISortableConsumer<int>
+    public class VoidSortableConsumer : SortableConsumerBase
     {
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
-        public Task ConsumeAsync(int val)
+        public override Task ConsumeAsync(int val)
         {
             return Task.CompletedTask;
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public int[] GetOrdered()
+        public override int[] GetOrdered()
         {
             return new int[] { };
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using JetBrains.Annotations;
 using PerfTest.Consumer;
 
 namespace PerfTest
@@ -14,185 +15,91 @@ namespace PerfTest
     public class ConsumerBenchmark
     {
         /// <summary>
-        /// 
+        /// MaxNumber of elements in input
+        /// Used to generate test data and limit benchmark params
         /// </summary>
-        private const int MaxInputSize = 1000000;
+        private const int MaxInputSize = 2000000;
 
         /// <summary>
-        /// 
+        /// Minimum value in input
         /// </summary>
         private const int MinInputValue = 0;
         /// <summary>
-        /// 
+        /// Maximum value in input
         /// </summary>
-        private const int MaxInputValue = 1000000-1;
+        private const int MaxInputValue = 2000000-1;
 
         /// <summary>
         /// Channel for data transportation
         /// </summary>
         private Channel<int> _channel;
 
+        /// <summary>
+        /// Input numners, simmilar for each consumer
+        /// </summary>
         private List<int> _input;
 
+        #region BenchmarkParams
+
         /// <summary>
-        /// 
+        /// Use sort in consumer in benchmark run
         /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// /// <param name="sortAfter"></param>
-        /// <returns></returns>
+        [ParamsSource(nameof(ValuesForUseSort))]
+        [UsedImplicitly]
+        public bool UseSort { get; set; }
+
+        /// <summary>
+        /// Number of elements in benchmark run
+        /// </summary>
+        [ParamsSource(nameof(ValuesForInputSize))]
+        [UsedImplicitly]
+        public int InputSize { get; set; }
+
+        /// <summary>
+        /// Number of elements in benchmark run
+        /// </summary>
+        [ParamsSource(nameof(ValuesForConsumer))]
+        [UsedImplicitly]
+        public ISortableConsumer<int> Consumer { get; set; }
+
+        /// <summary>
+        /// Possible values for param <see cref="UseSort"/>
+        /// </summary>
+        public IEnumerable<bool> ValuesForUseSort => new[] {true, false};
+
+        /// <summary>
+        /// Possible values for param <see cref="InputSize"/>
+        /// </summary>
+        public IEnumerable<int> ValuesForInputSize => new[] {100000, }; //500000, 1000000, MaxInputSize
+
+        /// <summary>
+        /// Possible values for param <see cref="Consumer"/>
+        /// </summary>
+        public IEnumerable<ISortableConsumer<int>> ValuesForConsumer => new ISortableConsumer<int>[]
+        {
+            new VoidSortableConsumer(),
+            new DictionarySortableConsumer(MinInputValue, MaxInputValue),
+            new ConcurrentDictionarySortableConsumer(),
+            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            // ToDo new LinkedListSortableConsumer(),
+            // ToDo new ListSortableConsumer() Long sort in big numbers
+        };
+
+        #endregion
+
+        /// <summary>
+        /// Benchmark
+        /// </summary>
         [Benchmark]
-        [Arguments(100000, false)]
-        [Arguments(500000, false)]
-        [Arguments(1000000, false)]
-        [Arguments(100000, true)]
-        [Arguments(500000, true)]
-        [Arguments(1000000, true)]
-        public async Task VoidSortableConsumer(int inputSize, bool sortAfter)
+        public async Task Benchmark()
         {
-            ISortableConsumer<int> sortableConsumer = new VoidSortableConsumer();
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
+            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, InputSize));
+            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, Consumer));
 
             await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
+            if (UseSort)
             {
-                var ordered = sortableConsumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// /// <param name="sortAfter"></param>
-        /// <returns></returns>
-        [Benchmark]
-        [Arguments(100000, false)]
-        [Arguments(500000, false)]
-        [Arguments(1000000, false)]
-        [Arguments(100000, true)]
-        [Arguments(500000, true)]
-        [Arguments(1000000, true)]
-        public async Task DictionarySortableConsumer(int inputSize, bool sortAfter)
-        {
-            ISortableConsumer<int> sortableConsumer = new DictionarySortableConsumer(MinInputValue, MaxInputValue);
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
-
-            await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
-            {
-                var ordered = sortableConsumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// /// <param name="sortAfter"></param>
-        /// <returns></returns>
-        [Benchmark]
-        [Arguments(100000, false)]
-        [Arguments(500000, false)]
-        [Arguments(1000000, false)]
-        [Arguments(100000, true)]
-        [Arguments(500000, true)]
-        [Arguments(1000000, true)]
-        public async Task ConcurrentDictionarySortableConsumer(int inputSize, bool sortAfter)
-        {
-            ISortableConsumer<int> sortableConsumer = new ConcurrentDictionarySortableConsumer();
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
-
-            await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
-            {
-                var ordered = sortableConsumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// /// <param name="sortAfter"></param>
-        /// <returns></returns>
-        [Benchmark]
-        [Arguments(100000, false)]
-        [Arguments(500000, false)]
-        [Arguments(1000000, false)]
-        [Arguments(100000, true)]
-        [Arguments(500000, true)]
-        [Arguments(1000000, true)]
-        public async Task SortedListSortableConsumer(int inputSize, bool sortAfter)
-        {
-            ISortableConsumer<int> sortableConsumer = new SortedListSortableConsumer(MinInputValue, MaxInputValue);
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
-
-            await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
-            {
-                var ordered = sortableConsumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// <param name="sortAfter"></param>
-        /// <returns></returns>
-        /// ToDo: Optimize
-        // [Benchmark]
-        // [Arguments(100000, false)]
-        // [Arguments(500000, false)]
-        // [Arguments(1000000, false)]
-        // [Arguments(100000, true)]
-        // [Arguments(500000, true)]
-        // [Arguments(1000000, true)]
-        public async Task LinkedListSortableConsumer(int inputSize, bool sortAfter)
-        {
-            ISortableConsumer<int> sortableConsumer = new LinkedListSortableConsumer();
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
-
-            await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
-            {
-                var ordered = sortableConsumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
-            }
-        }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputSize">Input size</param>
-        /// <param name="sortAfter"></param>
-        /// <returns></returns>
-        [Benchmark]
-        [Arguments(100000, false)]
-        [Arguments(500000, false)]
-        [Arguments(1000000, false)]
-        [Arguments(100000, true)]
-        [Arguments(500000, true)]
-        [Arguments(1000000, true)]
-        public async Task ListSortableConsumer(int inputSize, bool sortAfter)
-        {
-            ISortableConsumer<int> sortableConsumer = new ListSortableConsumer();
-            var writer = Task.Run(() => WriteDataToChannelAsync(_channel.Writer, inputSize));
-            var reader = Task.Run(() => ReadDataFromChannelAsync(_channel.Reader, sortableConsumer));
-
-            await Task.WhenAll(writer, reader).ConfigureAwait(false);
-            if (sortAfter)
-            {
-                var ordered = sortableConsumer.GetOrdered();
+                var ordered = Consumer.GetOrdered();
                 Console.WriteLine(ordered.Length);
             }
         }
@@ -203,9 +110,6 @@ namespace PerfTest
             _input = GenerateValues();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         [IterationSetup]
         public void IterationSetup()
         {
@@ -216,28 +120,8 @@ namespace PerfTest
         }
 
         /// <summary>
-        /// 
+        /// Reads data from channel and sends it to Consumer
         /// </summary>
-        [IterationCleanup]
-        public void IterationCleanup()
-        {
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [GlobalCleanup]
-        public void GlobalCleanup()
-        {
-            _input = null;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="channelReader"></param>
-        /// <param name="sortableConsumer"></param>
-        /// <returns></returns>
         private async Task ReadDataFromChannelAsync(ChannelReader<int> channelReader, ISortableConsumer<int> sortableConsumer)
         {
             while (await channelReader.WaitToReadAsync().ConfigureAwait(false))
@@ -248,11 +132,8 @@ namespace PerfTest
         }
 
         /// <summary>
-        /// 
+        /// Write data to channel
         /// </summary>
-        /// <param name="channelWriter"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
         private async Task WriteDataToChannelAsync(ChannelWriter<int> channelWriter, int count)
         {
             for (var i = 0; i < count; i++)
@@ -265,9 +146,8 @@ namespace PerfTest
         }
 
         /// <summary>
-        /// 
+        /// Generate input values for benchmark
         /// </summary>
-        /// <returns></returns>
         private List<int> GenerateValues()
         {
             var values = new List<int>(MaxInputSize);

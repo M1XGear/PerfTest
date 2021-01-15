@@ -8,7 +8,7 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public class DictionarySortableConsumer : ISortableConsumer<int>
+    public class DictionarySortableConsumer : SortableConsumerBase
     {
         private readonly Dictionary<int, int> _memory;
         private readonly ReaderWriterLockSlim _memoryLock = new ReaderWriterLockSlim();
@@ -28,7 +28,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
-        public Task ConsumeAsync(int val)
+        public override Task ConsumeAsync(int val)
         {
             _memoryLock.EnterWriteLock();
             try
@@ -44,7 +44,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public int[] GetOrdered()
+        public override int[] GetOrdered()
         {
             IOrderedEnumerable<KeyValuePair<int, int>> copy;
             _memoryLock.EnterReadLock();

@@ -8,7 +8,7 @@ namespace PerfTest.Consumer
     /// <summary>
     /// ToDo: Optimize (sortOnInsert), or it's no different from simpleList
     /// </summary>
-    public class LinkedListSortableConsumer : ISortableConsumer<int>
+    public class LinkedListSortableConsumer : SortableConsumerBase
     {
         private readonly LinkedList<int> _memory;
         private readonly ReaderWriterLockSlim _memoryLock = new ReaderWriterLockSlim();
@@ -22,7 +22,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
-        public Task ConsumeAsync(int val)
+        public override Task ConsumeAsync(int val)
         {
             _memoryLock.EnterWriteLock();
             try
@@ -38,7 +38,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public int[] GetOrdered()
+        public override int[] GetOrdered()
         {
             _memoryLock.EnterReadLock();
             IOrderedEnumerable<int> copy;
