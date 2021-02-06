@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Environments;
+using BenchmarkDotNet.Jobs;
 using JetBrains.Annotations;
 using PerfTest.Consumer;
 
@@ -12,8 +15,30 @@ namespace PerfTest
     /// Benchmark class
     /// </summary>
     [MemoryDiagnoser]
+    [Config(typeof(Config))]
     public class ConsumerBenchmark
     {
+        private class Config : ManualConfig
+        {
+            public Config()
+            {
+                AddJob(Job.Dry
+                    .WithPlatform(Platform.X64)
+                    .WithRuntime(CoreRuntime.Core50)
+                    .WithGcServer(true)
+                    .WithGcForce(true)
+                    .WithLaunchCount(5)
+                    .WithId("Server"));
+                AddJob(Job.Dry
+                    .WithPlatform(Platform.X64)
+                    .WithRuntime(CoreRuntime.Core50)
+                    .WithGcServer(false)
+                    .WithGcForce(true)
+                    .WithLaunchCount(5)
+                    .WithId("Workstation"));
+            }
+        }
+
         /// <summary>
         /// MaxNumber of elements in input
         /// Used to generate test data and limit benchmark params
@@ -70,7 +95,7 @@ namespace PerfTest
         /// <summary>
         /// Possible values for param <see cref="InputSize"/>
         /// </summary>
-        public IEnumerable<int> ValuesForInputSize => new[] {100000, }; //500000, 1000000, MaxInputSize
+        public IEnumerable<int> ValuesForInputSize => new[] {100000, 1000000}; //500000 MaxInputSize
 
         /// <summary>
         /// Possible values for param <see cref="Consumer"/>
@@ -79,8 +104,11 @@ namespace PerfTest
         {
             new VoidSortableConsumer(),
             new DictionarySortableConsumer(MinInputValue, MaxInputValue),
-            new ConcurrentDictionarySortableConsumer(),
-            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            new DictionarySortableConsumerWithOverridenInt(MinInputValue, MaxInputValue),
+            new ArraySortableConsumerBase(MinInputValue, MaxInputValue),
+            //new ConcurrentDictionarySortableConsumer(),
+            //new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            // ToDo Add Dictionary consumer with overriden int GetHashCodeFunction
             // ToDo new LinkedListSortableConsumer(),
             // ToDo new ListSortableConsumer() Long sort in big numbers
         };

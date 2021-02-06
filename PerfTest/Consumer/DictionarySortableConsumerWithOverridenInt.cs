@@ -8,9 +8,9 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public class DictionarySortableConsumer : SortableConsumerBase
+    public class DictionarySortableConsumerWithOverridenInt: SortableConsumerBase
     {
-        private readonly Dictionary<int, int> _memory;
+        private readonly Dictionary<MyInt, int> _memory;
         private readonly ReaderWriterLockSlim _memoryLock = new ReaderWriterLockSlim();
 
         /// <summary>
@@ -18,22 +18,24 @@ namespace PerfTest.Consumer
         /// </summary>
         /// <param name="minInputValue"></param>
         /// <param name="maxInputValue"></param>
-        public DictionarySortableConsumer(int minInputValue, int maxInputValue)
+        public DictionarySortableConsumerWithOverridenInt(int minInputValue, int maxInputValue)
         {
-            _memory = new Dictionary<int, int>(maxInputValue - minInputValue + 1);
+            _memory = new Dictionary<MyInt, int>(maxInputValue - minInputValue + 1);
             for (var i = minInputValue; i <= maxInputValue; i++)
             {
-                _memory[i] = 0;
+                var val = new MyInt(i);
+                _memory[val] = 0;
             }
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
         public override Task ConsumeAsync(int val)
         {
+            var myVal = new MyInt(val);
             _memoryLock.EnterWriteLock();
             try
             {
-                _memory[val] = _memory[val] + 1;
+                _memory[myVal] = _memory[myVal] + 1;
             }
             finally
             {
@@ -46,7 +48,7 @@ namespace PerfTest.Consumer
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
         public override int[] GetOrdered()
         {
-            KeyValuePair<int, int>[] copy;
+            KeyValuePair<MyInt, int>[] copy;
             _memoryLock.EnterReadLock();
             try
             {
@@ -62,11 +64,31 @@ namespace PerfTest.Consumer
             {
                 for (var i = 0; i < keyValuePair.Value; i++)
                 {
-                    list.Add(keyValuePair.Key);
+                    list.Add(keyValuePair.Key.Value);
                 }
             }
 
             return list.ToArray();
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    internal readonly struct MyInt
+    {
+        private readonly int _val;
+
+        public MyInt(int val)
+        {
+            _val = val;
+        }
+
+        public int Value => _val;
+
+        public override int GetHashCode()
+        {
+            return _val;
         }
     }
 }

@@ -10,16 +10,20 @@ namespace PerfTest.Tests.Consumer
         {
             new object[] { new ConcurrentDictionarySortableConsumer() },
             new object[] { new DictionarySortableConsumer(1, 10) },
+            new object[] { new DictionarySortableConsumerWithOverridenInt(1, 10) },
             new object[] { new LinkedListSortableConsumer() },
-            new object[] { new ListSortableConsumer() }
+            new object[] { new ListSortableConsumer() },
+            new object[] { new ArraySortableConsumerBase(1, 10) }
         };
 
         private static object[] _testCaseConsumeAsyncMultipleSimilarItems =
         {
             new object[] { new ConcurrentDictionarySortableConsumer() },
-            new object[] { new DictionarySortableConsumer(1, 10) },
+            new object[] { new DictionarySortableConsumer(-2, 5) },
+            new object[] { new DictionarySortableConsumerWithOverridenInt(-2, 5) },
             new object[] { new LinkedListSortableConsumer() },
-            new object[] { new ListSortableConsumer() }
+            new object[] { new ListSortableConsumer() },
+            new object[] { new ArraySortableConsumerBase(-2, 5) }
         };
 
         [TestCaseSource(nameof(_testCaseConsumeAsync3DifferentItems))]

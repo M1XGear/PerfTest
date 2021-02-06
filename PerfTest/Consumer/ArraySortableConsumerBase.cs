@@ -8,20 +8,29 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public class DictionarySortableConsumer : SortableConsumerBase
+    public class ArraySortableConsumerBase : SortableConsumerBase
     {
-        private readonly Dictionary<int, int> _memory;
+        private readonly int[] _memory;
         private readonly ReaderWriterLockSlim _memoryLock = new ReaderWriterLockSlim();
+
+        private readonly int _minInputValue;
+        private readonly int _maxInputValue;
+        private readonly int _size;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="minInputValue"></param>
         /// <param name="maxInputValue"></param>
-        public DictionarySortableConsumer(int minInputValue, int maxInputValue)
+        public ArraySortableConsumerBase(int minInputValue, int maxInputValue)
         {
-            _memory = new Dictionary<int, int>(maxInputValue - minInputValue + 1);
-            for (var i = minInputValue; i <= maxInputValue; i++)
+            _minInputValue = minInputValue;
+            _maxInputValue = maxInputValue;
+            _size = maxInputValue - minInputValue;
+
+            _memory = new int[_size];
+
+            for (int i = 0; i < _size; i++)
             {
                 _memory[i] = 0;
             }
@@ -30,23 +39,15 @@ namespace PerfTest.Consumer
         /// <inheritdoc cref="ISortableConsumer{T}.ConsumeAsync"/>
         public override Task ConsumeAsync(int val)
         {
-            _memoryLock.EnterWriteLock();
-            try
-            {
-                _memory[val] = _memory[val] + 1;
-            }
-            finally
-            {
-                _memoryLock.ExitWriteLock();
-            }
-
+            var idx = val - _minInputValue;
+            _memory[idx]++;
             return Task.CompletedTask;
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
         public override int[] GetOrdered()
         {
-            KeyValuePair<int, int>[] copy;
+            int[] copy;
             _memoryLock.EnterReadLock();
             try
             {
@@ -57,13 +58,16 @@ namespace PerfTest.Consumer
                 _memoryLock.ExitReadLock();
             }
 
-            var list = new List<int>(copy.Length);
-            foreach (var keyValuePair in copy)
+            var list = new List<int>(_size);
+            var value = _minInputValue;
+            for (int i = 0; i < _size; i++)
             {
-                for (var i = 0; i < keyValuePair.Value; i++)
+                for (int count = 0; count < copy[i]; count++)
                 {
-                    list.Add(keyValuePair.Key);
+                    list.Add(value);
                 }
+
+                value++;
             }
 
             return list.ToArray();
