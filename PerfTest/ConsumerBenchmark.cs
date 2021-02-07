@@ -28,14 +28,14 @@ namespace PerfTest
                     .WithRuntime(CoreRuntime.Core50)
                     .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithLaunchCount(3)
+                    .WithIterationCount(5)
                     .WithId("Core50"));
                 AddJob(Job.Dry
                     .WithPlatform(Platform.X64)
                     .WithRuntime(CoreRuntime.Core31)
                     .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithLaunchCount(3)
+                    .WithIterationCount(5)
                     .WithId("Core31"));
             }
         }
@@ -92,12 +92,12 @@ namespace PerfTest
         /// <summary>
         /// Possible values for param <see cref="UseSort"/>
         /// </summary>
-        public IEnumerable<bool> ValuesForUseSort => new[] {false, true};
+        public IEnumerable<bool> ValuesForUseSort => new[] {true};
 
         /// <summary>
         /// Possible values for param <see cref="InputSize"/>
         /// </summary>
-        public IEnumerable<int> ValuesForInputSize => new[] {1000000, 10000000, MaxInputSize};
+        public IEnumerable<int> ValuesForInputSize => new[] {100000, 1000000, 5000000, 10000000};
 
         /// <summary>
         /// Possible values for param <see cref="Consumer"/>
@@ -109,7 +109,6 @@ namespace PerfTest
             new ArraySortableConsumer(MinInputValue, MaxInputValue),
             new SortedListSortableConsumer(MinInputValue, MaxInputValue),
             new ConcurrentDictionarySortableConsumer(),
-            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
             new LinkedListSortableConsumer(),
             new ListSortableConsumer() //Long sort in big numbers
         };
