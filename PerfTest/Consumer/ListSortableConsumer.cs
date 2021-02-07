@@ -38,20 +38,20 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public override int[] GetOrdered()
+        public override IEnumerable<int> GetOrdered()
         {
+            int[] copy;
             _memoryLock.EnterReadLock();
-            IOrderedEnumerable<int> copy;
             try
             {
-                copy = _memory.OrderBy(x => x);
+                copy = _memory.ToArray();
             }
             finally
             {
                 _memoryLock.ExitReadLock();
             }
 
-            return copy.ToArray();
+            return copy.OrderBy(x=>x);
         }
     }
 }

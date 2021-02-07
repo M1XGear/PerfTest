@@ -8,13 +8,12 @@ namespace PerfTest.Consumer
     /// <summary>
     /// 
     /// </summary>
-    public class ArraySortableConsumerBase : SortableConsumerBase
+    public class ArraySortableConsumer : SortableConsumerBase
     {
         private readonly int[] _memory;
         private readonly ReaderWriterLockSlim _memoryLock = new ReaderWriterLockSlim();
 
         private readonly int _minInputValue;
-        private readonly int _maxInputValue;
         private readonly int _size;
 
         /// <summary>
@@ -22,10 +21,9 @@ namespace PerfTest.Consumer
         /// </summary>
         /// <param name="minInputValue"></param>
         /// <param name="maxInputValue"></param>
-        public ArraySortableConsumerBase(int minInputValue, int maxInputValue)
+        public ArraySortableConsumer(int minInputValue, int maxInputValue)
         {
             _minInputValue = minInputValue;
-            _maxInputValue = maxInputValue;
             _size = maxInputValue - minInputValue;
 
             _memory = new int[_size];
@@ -45,7 +43,7 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public override int[] GetOrdered()
+        public override IEnumerable<int> GetOrdered()
         {
             int[] copy;
             _memoryLock.EnterReadLock();
@@ -60,9 +58,9 @@ namespace PerfTest.Consumer
 
             var list = new List<int>(_size);
             var value = _minInputValue;
-            for (int i = 0; i < _size; i++)
+            for (var i = 0; i < _size; i++)
             {
-                for (int count = 0; count < copy[i]; count++)
+                for (var count = 0; count < copy[i]; count++)
                 {
                     list.Add(value);
                 }
@@ -70,7 +68,7 @@ namespace PerfTest.Consumer
                 value++;
             }
 
-            return list.ToArray();
+            return list;
         }
     }
 }

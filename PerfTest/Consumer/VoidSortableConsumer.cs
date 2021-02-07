@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PerfTest.Consumer
 {
@@ -14,9 +16,9 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public override int[] GetOrdered()
+        public override IEnumerable<int> GetOrdered()
         {
-            return new int[] { };
+            return Array.Empty<int>();
         }
     }
 }

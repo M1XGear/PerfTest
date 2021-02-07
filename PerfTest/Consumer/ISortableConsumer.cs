@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PerfTest.Consumer
 {
@@ -13,8 +14,9 @@ namespace PerfTest.Consumer
         Task ConsumeAsync(T val);
 
         /// <summary>
-        /// Sort saved values
+        /// Sort saved values.
+        /// Should not interupt <see cref="ConsumeAsync"/>
         /// </summary>
-        int[] GetOrdered();
+        IEnumerable<int> GetOrdered();
     }
 }

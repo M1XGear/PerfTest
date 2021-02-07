@@ -44,19 +44,20 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public override int[] GetOrdered()
+        public override IEnumerable<int> GetOrdered()
         {
-            _memoryLock.EnterReadLock();
             KeyValuePair<int, int>[] copy;
+            _memoryLock.EnterReadLock();
             try
             {
-                copy = _memory.Where(x => x.Value != 0).ToArray();
+                copy = _memory.ToArray();
             }
             finally
             {
                 _memoryLock.ExitReadLock();
             }
 
+            // Copy should be already sorted because SortedList stores data in sorted way
             var list = new List<int>();
             foreach (var keyValuePair in copy)
             {
@@ -66,7 +67,7 @@ namespace PerfTest.Consumer
                 }
             }
 
-            return list.ToArray();
+            return list;
         }
     }
 }

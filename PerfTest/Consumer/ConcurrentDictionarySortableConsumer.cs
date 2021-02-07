@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PerfTest.Consumer
@@ -29,10 +28,12 @@ namespace PerfTest.Consumer
         }
 
         /// <inheritdoc cref="ISortableConsumer{T}.GetOrdered"/>
-        public override int[] GetOrdered()
+        public override IEnumerable<int> GetOrdered()
         {
-            var list = new List<int>();
-            foreach (var keyValuePair in _memory.OrderBy(x => x.Key))
+            KeyValuePair<int, int>[] copy = _memory.ToArray();
+
+            var list = new List<int>(copy.Length);
+            foreach (var keyValuePair in copy)
             {
                 for (var i = 0; i < keyValuePair.Value; i++)
                 {
@@ -40,7 +41,7 @@ namespace PerfTest.Consumer
                 }
             }
 
-            return list.ToArray();
+            return list;
         }
     }
 }
