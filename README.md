@@ -4,6 +4,7 @@
   * [Task description](#task-description)
 * [Ru](#ru)
   * [Описание задачи](#описание-задачи)
+* [Results](#results)
 * [Raw data](#raw-data)
 
 ## En
@@ -16,6 +17,12 @@ Program need to save this input and be able to print them in ordered way any tim
 Есть конченый набор входных данных. Каждый момент времени подаётся одно число.
 
 Нужно сохранять эти входные данные и иметь возможность получить их в отсортированном виде в любой момент времени.
+
+## Results
+![Time performance](https://github.com/M1XGear/PerfTest/blob/main/Results/Performance.svg?raw=true)
+
+
+![Memory performance](https://github.com/M1XGear/PerfTest/blob/main/Results/Memory%20(.NET%20Core%205.0).svg?raw=true)
 
 # Raw data
 ``` ini
