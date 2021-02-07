@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
@@ -27,15 +28,15 @@ namespace PerfTest
                     .WithRuntime(CoreRuntime.Core50)
                     .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithLaunchCount(5)
-                    .WithId("Server"));
+                    .WithLaunchCount(3)
+                    .WithId("Core50"));
                 AddJob(Job.Dry
                     .WithPlatform(Platform.X64)
-                    .WithRuntime(CoreRuntime.Core50)
-                    .WithGcServer(false)
+                    .WithRuntime(CoreRuntime.Core31)
+                    .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithLaunchCount(5)
-                    .WithId("Workstation"));
+                    .WithLaunchCount(3)
+                    .WithId("Core31"));
             }
         }
 
@@ -43,16 +44,17 @@ namespace PerfTest
         /// MaxNumber of elements in input
         /// Used to generate test data and limit benchmark params
         /// </summary>
-        private const int MaxInputSize = 2000000;
+        private const int MaxInputSize = 100000000;
 
         /// <summary>
         /// Minimum value in input
         /// </summary>
         private const int MinInputValue = 0;
+
         /// <summary>
         /// Maximum value in input
         /// </summary>
-        private const int MaxInputValue = 2000000-1;
+        private const int MaxInputValue = 100000000-1;
 
         /// <summary>
         /// Channel for data transportation
@@ -90,12 +92,12 @@ namespace PerfTest
         /// <summary>
         /// Possible values for param <see cref="UseSort"/>
         /// </summary>
-        public IEnumerable<bool> ValuesForUseSort => new[] {true, false};
+        public IEnumerable<bool> ValuesForUseSort => new[] {false, true};
 
         /// <summary>
         /// Possible values for param <see cref="InputSize"/>
         /// </summary>
-        public IEnumerable<int> ValuesForInputSize => new[] {100000, 1000000}; //500000 MaxInputSize
+        public IEnumerable<int> ValuesForInputSize => new[] {1000000, 10000000, MaxInputSize};
 
         /// <summary>
         /// Possible values for param <see cref="Consumer"/>
@@ -104,13 +106,12 @@ namespace PerfTest
         {
             new VoidSortableConsumer(),
             new DictionarySortableConsumer(MinInputValue, MaxInputValue),
-            new DictionarySortableConsumerWithOverridenInt(MinInputValue, MaxInputValue),
-            new ArraySortableConsumerBase(MinInputValue, MaxInputValue),
-            //new ConcurrentDictionarySortableConsumer(),
-            //new SortedListSortableConsumer(MinInputValue, MaxInputValue),
-            // ToDo Add Dictionary consumer with overriden int GetHashCodeFunction
-            // ToDo new LinkedListSortableConsumer(),
-            // ToDo new ListSortableConsumer() Long sort in big numbers
+            new ArraySortableConsumer(MinInputValue, MaxInputValue),
+            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            new ConcurrentDictionarySortableConsumer(),
+            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            new LinkedListSortableConsumer(),
+            new ListSortableConsumer() //Long sort in big numbers
         };
 
         #endregion
@@ -128,7 +129,7 @@ namespace PerfTest
             if (UseSort)
             {
                 var ordered = Consumer.GetOrdered();
-                Console.WriteLine(ordered.Length);
+                Console.WriteLine(ordered.Count());
             }
         }
 
