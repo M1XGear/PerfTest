@@ -33,7 +33,7 @@ namespace PerfTest.Consumer
             _memoryLock.EnterWriteLock();
             try
             {
-                _memory[val] = _memory[val] + 1;
+                _memory[val]++;
             }
             finally
             {

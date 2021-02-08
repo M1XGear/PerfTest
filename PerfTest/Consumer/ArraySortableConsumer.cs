@@ -38,7 +38,16 @@ namespace PerfTest.Consumer
         public override Task ConsumeAsync(int val)
         {
             var idx = val - _minInputValue;
-            _memory[idx]++;
+            _memoryLock.EnterWriteLock();
+            try
+            {
+                _memory[idx]++;
+            }
+            finally
+            {
+                _memoryLock.ExitWriteLock();
+            }
+
             return Task.CompletedTask;
         }
 

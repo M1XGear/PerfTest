@@ -107,7 +107,7 @@ namespace PerfTest
             new VoidSortableConsumer(),
             new DictionarySortableConsumer(MinInputValue, MaxInputValue),
             new ArraySortableConsumer(MinInputValue, MaxInputValue),
-            new SortedListSortableConsumer(MinInputValue, MaxInputValue),
+            // new SortedListSortableConsumer(MinInputValue, MaxInputValue), // Slowest
             new ConcurrentDictionarySortableConsumer(),
             new LinkedListSortableConsumer(),
             new ListSortableConsumer() //Long sort in big numbers

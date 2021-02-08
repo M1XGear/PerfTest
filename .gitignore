@@ -7,3 +7,5 @@ Releases/
 .idea/
 
 .vs/
+
+*.user
