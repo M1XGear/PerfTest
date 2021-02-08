@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Channels;
@@ -28,14 +28,14 @@ namespace PerfTest
                     .WithRuntime(CoreRuntime.Core50)
                     .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithIterationCount(5)
+                    .WithIterationCount(10)
                     .WithId("Core50"));
                 AddJob(Job.Dry
                     .WithPlatform(Platform.X64)
                     .WithRuntime(CoreRuntime.Core31)
                     .WithGcServer(true)
                     .WithGcForce(true)
-                    .WithIterationCount(5)
+                    .WithIterationCount(10)
                     .WithId("Core31"));
             }
         }
@@ -92,7 +92,7 @@ namespace PerfTest
         /// <summary>
         /// Possible values for param <see cref="UseSort"/>
         /// </summary>
-        public IEnumerable<bool> ValuesForUseSort => new[] {true};
+        public IEnumerable<bool> ValuesForUseSort => new[] {true, false};
 
         /// <summary>
         /// Possible values for param <see cref="InputSize"/>

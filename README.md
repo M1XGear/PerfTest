@@ -22,7 +22,7 @@ Program need to save this input and be able to print them in ordered way any tim
 ![Time performance](https://github.com/M1XGear/PerfTest/blob/main/Results/Performance.svg?raw=true)
 
 
-![Memory performance](https://github.com/M1XGear/PerfTest/blob/main/Results/Memory%20(.NET%20Core%205.0).svg?raw=true)
+![Memory performance](https://github.com/M1XGear/PerfTest/blob/main/Results/Memory.svg?raw=true)
 
 [More charts](https://docs.google.com/spreadsheets/d/1mpi4laiTy0I0kRjMOtgpowWvan4lzcZMBvnko-Ea5Ig/edit?usp=sharing)
 
